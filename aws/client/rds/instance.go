@@ -40,16 +40,16 @@ type Instance interface {
 	SetFinalDBSnapshotIdentifier(id string) Instance
 	SetSkipFinalSnapshot(skip bool) Instance
 	SetForceFailover(force bool) Instance
-	SetTargetDBInstanceIdentifier(id string) Instance
-	SetRestoreTime(rt *time.Time) Instance
-	SetSourceDBInstanceAutomatedBackupsArn(arn string) Instance
-	SetSourceDBInstanceIdentifier(id string) Instance
-	SetSourceDBiResourceId(dbi string) Instance
-	SetUseLatestRestorableTime(enable bool) Instance
 	SetDBClusterIdentifier(id string) Instance
 	SetPublicAccessible(enable bool) Instance
 	SetLicenseModel(model string) Instance
 	SetSnapshotIdentifier(id string) Instance
+	SetPitrDBSourceIdentifier(id string) Instance
+	SetPitrDBTargetIdentifier(id string) Instance
+	SetPitrSourceDBiResourceId(dbi string) Instance
+	SetPitrUseLatestRestorableTime(enable bool) Instance
+	SetPitrRestoreTime(rt *time.Time) Instance
+	SetPitrSourceDBInstanceAutomatedBackupsArn(arn string) Instance
 
 	Create(context.Context) error
 	Delete(context.Context) error
@@ -72,6 +72,7 @@ type rdsInstance struct {
 // CreateDBInstanceInput
 func (s *rdsInstance) SetEngine(engine string) Instance {
 	s.createInstanceParam.Engine = aws.String(engine)
+	s.restoreInstancePitrParam.Engine = aws.String(engine)
 	return s
 }
 
@@ -86,6 +87,16 @@ func (s *rdsInstance) SetDBInstanceIdentifier(id string) Instance {
 	s.rebootInstanceParam.DBInstanceIdentifier = aws.String(id)
 	s.describeInstanceParam.DBInstanceIdentifier = aws.String(id)
 	s.createSnapshotParam.DBInstanceIdentifier = aws.String(id)
+	return s
+}
+
+func (s *rdsInstance) SetPitrDBSourceIdentifier(id string) Instance {
+	s.restoreInstancePitrParam.SourceDBInstanceIdentifier = aws.String(id)
+	return s
+}
+
+func (s *rdsInstance) SetPitrDBTargetIdentifier(id string) Instance {
+	s.restoreInstancePitrParam.TargetDBInstanceIdentifier = aws.String(id)
 	return s
 }
 
@@ -107,7 +118,7 @@ func (s *rdsInstance) SetDBInstanceClass(class string) Instance {
 
 func (s *rdsInstance) SetAllocatedStorage(size int32) Instance {
 	s.createInstanceParam.AllocatedStorage = aws.Int32(size)
-	// s.restoreInstancePitrParam.MaxAllocatedStorage = aws.Int32(size)
+	s.restoreInstancePitrParam.MaxAllocatedStorage = aws.Int32(size)
 	return s
 }
 
@@ -186,42 +197,33 @@ func (s *rdsInstance) Reboot(ctx context.Context) error {
 	return err
 }
 
-func (s *rdsInstance) SetTargetDBInstanceIdentifier(tid string) Instance {
-	s.restoreInstancePitrParam.TargetDBInstanceIdentifier = aws.String(tid)
+func (s *rdsInstance) SetAutoMinorVersionUpgrade(enable bool) Instance {
+	s.createInstanceParam.AutoMinorVersionUpgrade = aws.Bool(enable)
+	s.restoreInstancePitrParam.AutoMinorVersionUpgrade = aws.Bool(enable)
 	return s
 }
 
-// func (s *rdsInstance) SetAutoMinorVersionUpgrade(enable bool) Instance {
-// 	s.restoreInstancePitrParam.AutoMinorVersionUpgrade = aws.Bool(enable)
-// 	return s
-// }
+func (s *rdsInstance) SetPitrBackupTarget(target string) Instance {
+	s.restoreInstancePitrParam.BackupTarget = aws.String(target)
+	return s
+}
 
-// func (s *rdsInstance) SetBackupTarget(target string) Instance {
-// 	s.restoreInstancePitrParam.BackupTarget = aws.String(target)
-// 	return s
-// }
-
-func (s *rdsInstance) SetRestoreTime(rt *time.Time) Instance {
+func (s *rdsInstance) SetPitrRestoreTime(rt *time.Time) Instance {
 	s.restoreInstancePitrParam.RestoreTime = rt
 	return s
 }
 
-func (s *rdsInstance) SetSourceDBInstanceAutomatedBackupsArn(arn string) Instance {
+func (s *rdsInstance) SetPitrSourceDBInstanceAutomatedBackupsArn(arn string) Instance {
 	s.restoreInstancePitrParam.SourceDBInstanceAutomatedBackupsArn = aws.String(arn)
 	return s
 }
 
-func (s *rdsInstance) SetSourceDBInstanceIdentifier(sid string) Instance {
-	s.restoreInstancePitrParam.SourceDBInstanceIdentifier = aws.String(sid)
-	return s
-}
-
-func (s *rdsInstance) SetSourceDBiResourceId(dbi string) Instance {
+func (s *rdsInstance) SetPitrSourceDBiResourceId(dbi string) Instance {
 	s.restoreInstancePitrParam.SourceDbiResourceId = aws.String(dbi)
 	return s
 }
 
-func (s *rdsInstance) SetUseLatestRestorableTime(enable bool) Instance {
+func (s *rdsInstance) SetPitrUseLatestRestorableTime(enable bool) Instance {
 	s.restoreInstancePitrParam.UseLatestRestorableTime = enable
 	return s
 }
@@ -233,11 +235,13 @@ func (s *rdsInstance) SetDBClusterIdentifier(id string) Instance {
 
 func (s *rdsInstance) SetPublicAccessible(enable bool) Instance {
 	s.createInstanceParam.PubliclyAccessible = aws.Bool(enable)
+	s.restoreInstancePitrParam.PubliclyAccessible = aws.Bool(enable)
 	return s
 }
 
 func (s *rdsInstance) SetLicenseModel(model string) Instance {
 	s.createInstanceParam.LicenseModel = aws.String(model)
+	s.restoreInstancePitrParam.LicenseModel = aws.String(model)
 	return s
 }
 

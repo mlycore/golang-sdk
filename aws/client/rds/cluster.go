@@ -41,11 +41,11 @@ type Cluster interface {
 	SetStorageType(t string) Cluster
 	SetIOPS(iops int32) Cluster
 	SetSkipFinalSnapshot(skip bool) Cluster
-	SetSourceDBClusterIdentifier(sid string) Cluster
-	SetBacktraceWindow(w int64) Cluster
-	SetRestoreToTime(rt *time.Time) Cluster
-	SetRestoreType(t string) Cluster
-	SetUseLatestRestorableTime(enable bool) Cluster
+	SetPitrSourceDBClusterIdentifier(sid string) Cluster
+	SetPitrBacktraceWindow(w int64) Cluster
+	SetPitrRestoreToTime(rt *time.Time) Cluster
+	SetPitrRestoreType(t string) Cluster
+	SetPitrUseLatestRestorableTime(enable bool) Cluster
 	SetPublicAccessible(enable bool) Cluster
 	SetSnapshotIdentifier(id string) Cluster
 
@@ -149,6 +149,7 @@ func (s *rdsCluster) SetEngineVersion(version string) Cluster {
 
 func (s *rdsCluster) SetEngineMode(mode string) Cluster {
 	s.createClusterParam.EngineMode = aws.String(mode)
+	s.restoreDBClusterPitrParam.EngineMode = aws.String(mode)
 	return s
 }
 
@@ -169,6 +170,7 @@ func (s *rdsCluster) SetVpcSecurityGroupIds(sgs []string) Cluster {
 
 func (s *rdsCluster) SetStorageType(t string) Cluster {
 	s.createClusterParam.StorageType = aws.String(t)
+	s.restoreDBClusterPitrParam.StorageType = aws.String(t)
 	return s
 }
 
@@ -205,27 +207,27 @@ func (s *rdsCluster) Reboot(ctx context.Context) error {
 	return err
 }
 
-func (s *rdsCluster) SetSourceDBClusterIdentifier(sid string) Cluster {
+func (s *rdsCluster) SetPitrSourceDBClusterIdentifier(sid string) Cluster {
 	s.restoreDBClusterPitrParam.SourceDBClusterIdentifier = aws.String(sid)
 	return s
 }
 
-func (s *rdsCluster) SetBacktraceWindow(w int64) Cluster {
+func (s *rdsCluster) SetPitrBacktraceWindow(w int64) Cluster {
 	s.restoreDBClusterPitrParam.BacktrackWindow = aws.Int64(w)
 	return s
 }
 
-func (s *rdsCluster) SetRestoreToTime(rt *time.Time) Cluster {
+func (s *rdsCluster) SetPitrRestoreToTime(rt *time.Time) Cluster {
 	s.restoreDBClusterPitrParam.RestoreToTime = rt
 	return s
 }
 
-func (s *rdsCluster) SetRestoreType(t string) Cluster {
+func (s *rdsCluster) SetPitrRestoreType(t string) Cluster {
 	s.restoreDBClusterPitrParam.RestoreType = aws.String(t)
 	return s
 }
 
-func (s *rdsCluster) SetUseLatestRestorableTime(enable bool) Cluster {
+func (s *rdsCluster) SetPitrUseLatestRestorableTime(enable bool) Cluster {
 	s.restoreDBClusterPitrParam.UseLatestRestorableTime = enable
 	return s
 }
