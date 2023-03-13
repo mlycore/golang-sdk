@@ -18,8 +18,8 @@ type Object interface {
 	ToDistSQL() string
 }
 
-type converter struct{}
+type Converter struct{}
 
-func (c *converter) ToDistSQL(obj Object) string {
+func (c Converter) ConvertObjectToDistSQL(obj Object) string {
 	return obj.ToDistSQL()
 }
