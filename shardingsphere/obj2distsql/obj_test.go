@@ -83,7 +83,8 @@ func Test_CreateEncryptRule(t *testing.T) {
 		},
 	}
 
-	t.Logf("%s\n", r.ToDistSQL())
+	conv := &converter{}
+	t.Logf("%s\n", conv.ToDistSQL(&r))
 }
 
 func Test_EncryptRule(t *testing.T) {
