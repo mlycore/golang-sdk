@@ -28,22 +28,30 @@ func (t *CreateEncryptRule) ToDistSQL() string {
 }
 
 type EncryptRule struct {
-	IfNotExist         IfNotExists
-	EncryptDefinitions []EncryptDefinition
+	// ifNotExists
+	IfNotExist IfNotExists
+	// encryptDefinition
+	EncryptDefinitions EncryptDefinitionList
 }
 
-func (r *EncryptRule) ToDistSQL() string {
+func (t *EncryptRule) ToDistSQL() string {
 	var stmt string
-	if r.IfNotExist {
-		stmt = fmt.Sprintf("%s", r.IfNotExist.ToDistSQL())
+	if t.IfNotExist {
+		stmt = fmt.Sprintf("%s", t.IfNotExist.ToDistSQL())
 	}
+	stmt = fmt.Sprintf("%s %s;", stmt, t.EncryptDefinitions.ToDistSQL())
 
-	for _, def := range r.EncryptDefinitions {
+	return stmt
+}
+
+type EncryptDefinitionList []EncryptDefinition
+
+func (t *EncryptDefinitionList) ToDistSQL() string {
+	var stmt string
+	for _, def := range *t {
 		stmt = fmt.Sprintf("%s %s,", stmt, def.ToDistSQL())
 	}
 	stmt = strings.TrimSuffix(stmt, ",")
-	stmt = fmt.Sprintf("%s;", stmt)
-
 	return stmt
 }
 
@@ -57,22 +65,25 @@ type EncryptDefinition struct {
 	// name
 	Name string
 	// columns
-	Columns []Column
-	// queryWithCipherColumn
+	Columns ColumnList
+	// queryWithCipheColumn
 	QueryWithCipherColumn QueryWithCipherColumn
 }
 
 func (t *EncryptDefinition) ToDistSQL() string {
 	var stmt string
-	stmt = fmt.Sprintf("%s (COLUMNS ", t.Name)
+	stmt = fmt.Sprintf("%s (COLUMNS %s), %s)", t.Name, t.Columns.ToDistSQL(), t.QueryWithCipherColumn.ToDistSQL())
+	return stmt
+}
 
-	for _, c := range t.Columns {
+type ColumnList []Column
+
+func (t *ColumnList) ToDistSQL() string {
+	var stmt string
+	for _, c := range *t {
 		stmt = fmt.Sprintf("%s (%s),", stmt, c.ToDistSQL())
 	}
 	stmt = strings.TrimSuffix(stmt, ",")
-	stmt = fmt.Sprintf("%s)", stmt)
-	stmt = fmt.Sprintf("%s, %s", stmt, t.QueryWithCipherColumn.ToDistSQL())
-	stmt = fmt.Sprintf("%s)", stmt)
 	return stmt
 }
 
@@ -111,7 +122,6 @@ func (t *Column) ToDistSQL() string {
 	if len(t.LikeQueryColumn) != 0 {
 		stmt = fmt.Sprintf("%s, %s", stmt, t.LikeQueryColumn.ToDistSQL())
 	}
-
 	if t.EncryptionAlgorithm != nil {
 		stmt = fmt.Sprintf("%s, %s", stmt, t.EncryptionAlgorithm.ToDistSQL())
 	}
