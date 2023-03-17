@@ -27,9 +27,27 @@ func (t *CreateEncryptRule) ToDistSQL() string {
 	return fmt.Sprintf("CREATE ENCRYPT RULE %s", t.EncryptRule.ToDistSQL())
 }
 
+type AlterEncryptRule struct {
+	EncryptRule
+}
+
+func (t *AlterEncryptRule) ToDistSQL() string {
+	return fmt.Sprintf("ALTE ENCRYPT RULE %s", t.EncryptRule.ToDistSQL())
+}
+
+type DropEncryptRule struct {
+	EncryptRule
+}
+
+func (t *DropEncryptRule) ToDistSQL() string {
+	return fmt.Sprintf("DROP ENCRYPT RULE %s", t.EncryptRule.ToDistSQL())
+}
+
 type EncryptRule struct {
 	// ifNotExists
 	IfNotExist IfNotExists
+	// ifExists
+	IfExsits IfExists
 	// encryptDefinition
 	EncryptDefinitions EncryptDefinitionList
 }
@@ -59,6 +77,12 @@ type IfNotExists bool
 
 func (t IfNotExists) ToDistSQL() string {
 	return "IF NOT EXISTS"
+}
+
+type IfExists bool
+
+func (t IfExists) ToDistSQL() string {
+	return "IF EXISTS"
 }
 
 type EncryptDefinition struct {

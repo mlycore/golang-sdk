@@ -213,5 +213,22 @@ func Test_EncryptDefinitionToDistSQL(t *testing.T) {
 	}
 
 	t.Logf("%s\n", e.ToDistSQL())
+}
 
+func Test_DropEncryptRule(t *testing.T) {
+	e := &DropEncryptRule{
+		EncryptRule: EncryptRule{
+			IfExsits: true,
+			EncryptDefinitions: EncryptDefinitionList{
+				{
+					Name: "t_encrypt",
+				},
+				{
+					Name: "t_encrypt_2",
+				},
+			},
+		},
+	}
+
+	t.Logf("%s\n", e.ToDistSQL())
 }
