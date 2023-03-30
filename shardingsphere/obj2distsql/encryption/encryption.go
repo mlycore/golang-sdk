@@ -96,7 +96,7 @@ type EncryptDefinition struct {
 
 func (t *EncryptDefinition) ToDistSQL() string {
 	var stmt string
-	stmt = fmt.Sprintf("%s (COLUMNS %s), %s)", t.Name, t.Columns.ToDistSQL(), t.QueryWithCipherColumn.ToDistSQL())
+	stmt = fmt.Sprintf("%s (COLUMNS (%s), %s)", t.Name, t.Columns.ToDistSQL(), t.QueryWithCipherColumn.ToDistSQL())
 	return stmt
 }
 
