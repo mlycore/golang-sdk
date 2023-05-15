@@ -87,7 +87,7 @@ type DescInstance struct {
 	CharSetName                           string
 	DBInstanceArn                         string
 	DBInstanceIdentifier                  string
-	DBInstanceStatus                      string
+	DBInstanceStatus                      DBInstanceStatus
 	DeletionProtection                    bool
 	InstanceCreateTime                    time.Time
 	Timezone                              string
@@ -100,6 +100,23 @@ type DescInstance struct {
 	DBClusterIdentifier                   string
 	ReadReplicaDBClusterIdentifiers       []string
 }
+
+type DBInstanceStatus string
+
+const (
+	DBInstanceStatusAvailable DBInstanceStatus = "available"
+	DBInstanceStatusBackingUp DBInstanceStatus = "backing-up"
+	DBInstanceStatusCreating  DBInstanceStatus = "creating"
+	DBInstanceStatusDeleting  DBInstanceStatus = "deleting"
+	DBInstanceStatusFailed    DBInstanceStatus = "failed"
+	DBInstanceStatusModifying DBInstanceStatus = "modifying"
+	DBInstanceStatusRebooting DBInstanceStatus = "rebooting"
+	DBInstanceStatusRenaming  DBInstanceStatus = "renaming"
+	DBInstanceStatusStarting  DBInstanceStatus = "starting"
+	DBInstanceStatusStopped   DBInstanceStatus = "stopped"
+	DBInstanceStatusStopping  DBInstanceStatus = "stopping"
+	DBInstanceStatusReady     DBInstanceStatus = "Ready"
+)
 
 type ParameterGroupStatus struct {
 	Name        string
@@ -305,7 +322,7 @@ func convertDBInstance(dbInstance *types.DBInstance) *DescInstance {
 	desc.DBInstanceArn = aws.ToString(dbInstance.DBInstanceArn)
 	desc.DBInstanceIdentifier = aws.ToString(dbInstance.DBInstanceIdentifier)
 	if dbInstance.DBInstanceStatus != nil {
-		desc.DBInstanceStatus = aws.ToString(dbInstance.DBInstanceStatus)
+		desc.DBInstanceStatus = convertDBInstanceStatus(dbInstance.DBInstanceStatus)
 	}
 	desc.DeletionProtection = dbInstance.DeletionProtection
 	desc.InstanceCreateTime = aws.ToTime(dbInstance.InstanceCreateTime)
@@ -341,6 +358,10 @@ func convertEndpoint(endpoint *types.Endpoint) Endpoint {
 		Address: aws.ToString(endpoint.Address),
 		Port:    endpoint.Port,
 	}
+}
+
+func convertDBInstanceStatus(dbInstanceStatus *string) DBInstanceStatus {
+	return DBInstanceStatus(aws.ToString(dbInstanceStatus))
 }
 
 func convertParameterGroupStatus(dbParameterGroups []types.DBParameterGroupStatus) []ParameterGroupStatus {
