@@ -62,6 +62,7 @@ const (
 	ProvisionerAWSRDSInstance = "databaseclass.database-mesh.io/aws-rds-instance"
 	ProvisionerAWSRDSCluster  = "databaseclass.database-mesh.io/aws-rds-cluster"
 	ProvisionerAWSAurora      = "databaseclass.database-mesh.io/aws-aurora"
+	ProvisionerCloudNativePG  = "databaseclass.database-mesh.io/cloudnative-pg"
 )
 
 type DatabaseStorage struct {
